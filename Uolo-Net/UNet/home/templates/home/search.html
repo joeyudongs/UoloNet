@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+
+{% block body %}
+<div class="container-fluid" id="search-page">
+    <ul class="nav nav-tabs" id="searchTab">
+        <li class="active"><a data-toggle="tab" href="#search_patient">Search Patient</a></li>
+        <li><a data-toggle="tab" href="#search_data">Search Data</a></li>
+    </ul>
+    <div class="tab-content" id="searchTabContent">
+        <div class="tab-pane fade in active" id="search_patient">
+            <form id="search_patient_form" method="post">
+                {% csrf_token %}
+                <div class="row" style="max-height:800px, overflow:auto">
+                    <div class="col-lg-3">
+                        <h5>Institution:</h5>
+                        <div class="form-group">
+                        <select id="list-institution" name="list-institution[]" multiple="multiple"
+                                style="max-height:600px; max-width:400px; overflow: auto; white-space: nowrap;">
+                            {% for institution in institutions %}
+                            <option value="{{ institution.pk }}" style="padding-left:10px;">
+                                {{ institution.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-4" style="max-height:700px; overflow: auto;">
+                        <h5>Demographic</h5>
+                        <input type="text" id="form_institution_id" name="form_institution_id" hidden>
+                        Gender:
+                        <select name="gender" id="gender_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                            <option value="O">Other</option>
+                        </select><br><br>
+                        Age:
+                        <select name="age" id="age_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="greater"> ></option>
+                            <option value="less"> <</option>
+                            <option value="equal"> =</option>
+                            <option value="between"> between</option>
+                        </select>
+                        <input type="text" id="age_LB" name="LB" maxlength="4" size="4">
+                        <input type="text" id="age_UB" name="UB" maxlength="4" size="4">
+                        <br>
+                    </div>
+                    <div class="col-lg-5" style="max-height:700px; overflow: auto;">
+                        <h5>Medical Record</h5>
+                        <select name="mr_type" id="mr_type_select">
+                            <option value="" class="notag">--Select--</option>
+                        </select>
+                        <select name="mr_type_operator" id="mr_type_operator_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="greater"> ></option>
+                            <option value="less"> <</option>
+                            <option value="equal"> =</option>
+                            <option value="between"> between</option>
+                        </select>
+                        <input id="mr_values" hidden>
+                        <input type="text" id="mr_type_operator_LB" name="LB" maxlength="10" size="3">
+                        <input type="text" id="mr_type_operator_UB" name="UB" maxlength="10" size="3">
+                        <select name="mr_type_value" id="mr_type_value_select" style="display: none;">
+                        </select>
+                        <br><br>
+                        Tumor Laterality:
+                        <select name="tumor_laterality" id="tumor_laterality_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="R">Right</option>
+                            <option value="L">Left</option>
+                            <option value="B">Bilateral</option>
+                            <option value="C">Center</option>
+                        </select><br><br>
+                        Cancer Site:
+                        <select name="cancer_site" id="cancer_site_select">
+                            <option value="" class="notag">--Select--</option>
+                        </select><br><br>
+                        Cancer Subsite Of Origin:
+                        <select name="cancer_subsite" id="cancer_subsite_select">
+                            <option value="" class="notag">--Select--</option>
+                        </select><br><br>
+                        HPV Status:
+                        <select name="hpv_status" id="hpv_status_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="P">Positive</option>
+                            <option value="N">Negative</option>
+                            <option value="U">Unknown</option>
+                            <option value="D">Discordant</option>
+                        </select><br><br>
+                        EBV Status:
+                        <select name="ebv_status" id="ebv_status_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="P">Positive</option>
+                            <option value="N">Negative</option>
+                            <option value="U">Unknown</option>
+                        </select><br><br>
+                        T-category:
+                        <select name="T_category" id="T_category_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="x">x</option>
+                        </select><br><br>
+                        N-category:
+                        <select name="N_category" id="N_category_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2a">2a</option>
+                            <option value="2b">2b</option>
+                            <option value="2c">2c</option>
+                            <option value="3">3</option>
+                            <option value="x">x</option>
+                        </select><br><br>
+                        ICON-S:
+                        <select name="ICON_S" id="ICON_S_select">
+                            <option value="" class="notag">--Select--</option>
+                        </select><br><br>
+                        M-category:
+                        <select name="M_category" id="M_category_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="x">x</option>
+                        </select><br><br>
+                        AJCC stage:
+                        <select name="AJCC_stage" id="AJCC_stage_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4a">IVa</option>
+                            <option value="4b">IVb</option>
+                            <option value="4c">IVc</option>
+                        </select><br><br>
+                        Surgery Definitive:
+                        <select name="surgery_definitive" id="surgery_definitive_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Surgery Biopsy:
+                        <select name="surgery_diopsy" id="surgery_diopsy_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Chemotherapy Neoadjuvant:
+                        <select name="chemotherapy_neoadjuvant" id="chemotherapy_neoadjuvant_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Chemotherapy Concurrent:
+                        <select name="chemotherapy_concurrent" id="chemotherapy_concurrent_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Chemotherapy Adjuvant:
+                        <select name="chemotherapy_adjuvant" id="chemotherapy_adjuvant_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Radiation Treatment:
+                        <select name="radiation_treatment" id="radiation_treatment_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Radiation Treatment Duration:
+                        <input type="text" id="radiation_treatment_duration_text"
+                               name="radiation_treatment_duration_text" maxlength="10" size="3">
+                        <br><br>
+                        Total Prescribed Radiation Treatment Dose:
+                        <input type="text" id="radiation_treatment_dose_text" name="radiation_treatment_dose_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Vital Status:
+                        <select name="vital_status" id="vital_status_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="alive">Alive</option>
+                            <option value="dead">Dead</option>
+                            <option value="unknown">Unknown</option>
+                        </select><br><br>
+                        Overall Survival Duration:
+                        <input type="text" id="overall_survival_duration_text" name="overall_survival_duration_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Local Control:
+                        <select name="local_control" id="local_control_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Local Control Duration:
+                        <input type="text" id="local_control_duration_text" name="local_control_duration_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Regional Control:
+                        <select name="regional_control" id="regional_control_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Regional Control Duration:
+                        <input type="text" id="regional_control_duration_text" name="regional_control_duration_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Locoregional Control:
+                        <select name="locoregional_control" id="locoregional_control_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Locoregional Control Duration:
+                        <input type="text" id="locoregional_control_duration_text"
+                               name="locoregional_control_duration_text" maxlength="10" size="3">
+                        <br><br>
+                        Freedom From Distant Metastasis:
+                        <select name="freedom_from_distant_metastasis" id="freedom_from_distant_metastasis_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Freedom From Distant Metastasis Duration:
+                        <input type="text" id="freedom_from_distant_metastasis_duration_text"
+                               name="freedom_from_distant_metastasis_duration_text" maxlength="10" size="3">
+                        <br><br>
+                        Freedom From Relapse:
+                        <select name="freedom_from_relapse" id="freedom_from_relapse_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Relaspe-free Survival Duration:
+                        <input type="text" id="relaspe_free_survival_duration_text"
+                               name="relaspe_free_survival_duration_text" maxlength="10" size="3">
+                        <br><br>
+                    </div>
+                </div>
+                <div style="float:right; margin-top: 30px">
+                    <button type="button">Search</button>
+                </div>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="search_data">
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

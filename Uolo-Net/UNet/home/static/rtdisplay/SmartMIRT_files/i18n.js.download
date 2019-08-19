@@ -1,0 +1,15 @@
+//自己选择显示那种语言-国际化
+var ii18=["i18n/radiationcloudTexts_zh_CN.properties","i18n/radiationcloudTexts_en.properties"];
+var oI18nModel = new sap.ui.model.resource.ResourceModel({
+	bundleUrl: ii18[0]
+});
+
+//程序自己动判断-国际化
+//var oI18nModel = new sap.ui.model.resource.ResourceModel({
+//    bundleUrl: "i18n/radiationcloudTexts.properties"
+//});
+
+//console.log(oI18nModel);
+sap.ui.getCore().setModel(oI18nModel, "i18n");            
+var oBundle = sap.ui.getCore().getModel("i18n").getResourceBundle();
+//console.log(oBundle.getText("DOC_oMasterPage_title"));

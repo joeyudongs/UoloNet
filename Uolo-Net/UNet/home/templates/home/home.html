@@ -1,0 +1,481 @@
+{% extends 'base.html' %}
+
+
+{% block body %}
+<div class="container-fluid page" id="search-page">
+    <ul class="nav nav-tabs" id="searchTab">
+        <li class="active"><a data-toggle="tab" href="#search_patient">Search Patient</a></li>
+        <li><a data-toggle="tab" href="#search_data">Search Data</a></li>
+    </ul>
+    <div class="tab-content" id="searchTabContent">
+        <div class="tab-pane fade in active" id="search_patient">
+            <form id="search_patient_form" method="post">
+                {% csrf_token %}
+                <div class="row" style="max-height:800px, overflow:auto">
+                    <div class="col-lg-3">
+                        <h5>Institution</h5><br>
+                        <div class="form-group">
+                            <select id="search_list-institution" name="search_list-institution[]" multiple="multiple"
+                                    style="max-height:600px; max-width:400px; overflow: auto; white-space: nowrap;">
+                                {% for institution in institutions %}
+                                <option value="{{ institution.pk }}" style="padding-left:10px;">
+                                    {{ institution.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-4" style="max-height:700px; overflow: auto;">
+                        <h5>Demographic</h5><br>
+                        Sex:
+                        <select name="search_dm_gender" id="search_dm_gender_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select><br><br>
+                        Age:
+                        <select name="search_dm_age_oprt" id="search_dm_age_oprt_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="greater"> ></option>
+                            <option value="less"> <</option>
+                            <option value="equal"> =</option>
+                            <option value="between"> between</option>
+                        </select>
+                        <input type="text" id="search_dm_age_lb" name="search_dm_age_lb" maxlength="4" size="4">
+                        <input type="text" id="search_dm_age_ub" name="search_dm_age_ub" maxlength="4" size="4">
+                        <br>
+                    </div>
+                    <div class="col-lg-5" style="max-height:700px; overflow: auto;">
+                        <h5>Medical Record</h5><br>
+                        Tumor Laterality:
+                        <select name="search_mr_tumor_laterality" id="search_mr_tumor_laterality_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="R">Right</option>
+                            <option value="L">Left</option>
+                            <option value="B">Bilateral</option>
+                            <option value="C">Center</option>
+                        </select><br><br>
+                        Cancer Site:
+                        <select name="search_mr_cancer_site" id="search_mr_cancer_site_select">
+                            <option value="" class="notag">--Select--</option>
+                        </select><br><br>
+                        Cancer Subsite Of Origin:
+                        <select name="search_mr_cancer_subsite" id="search_mr_cancer_subsite_select">
+                            <option value="" class="notag">--Select--</option>
+                        </select><br><br>
+                        HPV Status:
+                        <select name="search_mr_hpv_status" id="search_mr_hpv_status_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="P">Positive</option>
+                            <option value="N">Negative</option>
+                            <option value="U">Unknown</option>
+                            <option value="D">Discordant</option>
+                        </select><br><br>
+                        EBV Status:
+                        <select name="search_mr_ebv_status" id="search_mr_ebv_status_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="P">Positive</option>
+                            <option value="N">Negative</option>
+                            <option value="U">Unknown</option>
+                        </select><br><br>
+                        T-category:
+                        <select name="search_mr_T_category" id="search_mr_T_category_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="x">x</option>
+                        </select><br><br>
+                        N-category:
+                        <select name="search_mr_N_category" id="search_mr_N_category_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2a">2a</option>
+                            <option value="2b">2b</option>
+                            <option value="2c">2c</option>
+                            <option value="3">3</option>
+                            <option value="x">x</option>
+                        </select><br><br>
+                        ICON-S:
+                        <select name="search_mr_ICON_S" id="search_mr_ICON_S_select">
+                            <option value="" class="notag">--Select--</option>
+                        </select><br><br>
+                        M-category:
+                        <select name="search_mr_M_category" id="search_mr_M_category_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="x">x</option>
+                        </select><br><br>
+                        AJCC stage:
+                        <select name="search_mr_AJCC_stage" id="search_mr_AJCC_stage_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="1">I</option>
+                            <option value="2">II</option>
+                            <option value="3">III</option>
+                            <option value="4a">IVa</option>
+                            <option value="4b">IVb</option>
+                            <option value="4c">IVc</option>
+                        </select><br><br>
+                        Surgery Definitive:
+                        <select name="search_mr_surgery_definitive" id="search_mr_surgery_definitive_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Surgery Biopsy:
+                        <select name="search_mr_surgery_diopsy" id="search_mr_surgery_diopsy_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Chemotherapy Neoadjuvant:
+                        <select name="search_mr_chemotherapy_neoadjuvant"
+                                id="search_mr_chemotherapy_neoadjuvant_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Chemotherapy Concurrent:
+                        <select name="search_mr_chemotherapy_concurrent" id="search_mr_chemotherapy_concurrent_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Chemotherapy Adjuvant:
+                        <select name="search_mr_chemotherapy_adjuvant" id="search_mr_chemotherapy_adjuvant_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Radiation Treatment:
+                        <select name="search_mr_radiation_treatment" id="search_mr_radiation_treatment_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Radiation Treatment Duration:
+                        <input type="text" id="search_mr_radiation_treatment_duration_text"
+                               name="search_mr_radiation_treatment_duration_text" maxlength="10" size="3">
+                        <br><br>
+                        Total Prescribed Radiation Treatment Dose:
+                        <input type="text" id="search_mr_radiation_treatment_dose_text"
+                               name="search_mr_radiation_treatment_dose_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Vital Status:
+                        <select name="search_mr_vital_status" id="search_mr_vital_status_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="alive">Alive</option>
+                            <option value="dead">Dead</option>
+                            <option value="unknown">Unknown</option>
+                        </select><br><br>
+                        Overall Survival Duration:
+                        <input type="text" id="search_mr_overall_survival_duration_text"
+                               name="search_mr_overall_survival_duration_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Local Control:
+                        <select name="search_mr_local_control" id="search_mr_local_control_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Local Control Duration:
+                        <input type="text" id="search_mr_local_control_duration_text"
+                               name="search_mr_local_control_duration_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Regional Control:
+                        <select name="search_mr_regional_control" id="search_mr_regional_control_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Regional Control Duration:
+                        <input type="text" id="search_mr_regional_control_duration_text"
+                               name="search_mr_regional_control_duration_text"
+                               maxlength="10" size="3">
+                        <br><br>
+                        Locoregional Control:
+                        <select name="search_mr_locoregional_control" id="search_mr_locoregional_control_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Locoregional Control Duration:
+                        <input type="text" id="search_mr_locoregional_control_duration_text"
+                               name="search_mr_locoregional_control_duration_text" maxlength="10" size="3">
+                        <br><br>
+                        Freedom From Distant Metastasis:
+                        <select name="search_mr_freedom_from_distant_metastasis"
+                                id="search_mr_freedom_from_distant_metastasis_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Freedom From Distant Metastasis Duration:
+                        <input type="text" id="search_mr_freedom_from_distant_metastasis_duration_text"
+                               name="search_mr_freedom_from_distant_metastasis_duration_text" maxlength="10" size="3">
+                        <br><br>
+                        Freedom From Relapse:
+                        <select name="search_mr_freedom_from_relapse" id="search_mr_freedom_from_relapse_select">
+                            <option value="" class="notag">--Select--</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select><br><br>
+                        Relaspe-free Survival Duration:
+                        <input type="text" id="search_mr_relaspe_free_survival_duration_text"
+                               name="search_mr_relaspe_free_survival_duration_text" maxlength="10" size="3">
+                        <br><br>
+                    </div>
+                </div>
+                <div style="text-align:center; margin-top: 30px">
+                    <button type="button" onclick='submitSearchForm()'>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="search_data">
+        </div>
+    </div>
+</div>
+<div class="container-fluid page" id="browse-page">
+    <div class="row">
+        <div class="col-lg-2 bg-light">
+            <div class="box">
+                <h4>Institution List:</h4>
+                <div class="list-group" id="institution_list" role="tablist">
+                </div>
+            </div>
+            <div class="box">
+                <h4>Patient List:</h4>
+                <div class="list-group" id="patient_list" role="tablist">
+                </div>
+            </div>
+            <div class="box" id="patient_summary">
+                <h4>
+                    Patient Summary:
+                </h4>
+                <table class="key-value-table" id="patient_sum_table">
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-10 bg-light">
+            <ul class="nav nav-tabs" id="resultTab">
+                <li class="active">
+                    <a data-toggle="tab" id="demography-tab" href="#demography">Demography</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" id="medical_record-tab" href="#medical_record">Medical Record</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" id="patient_data-tab" href="#patient_data">Patient Data</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" id="radiomics-tab" href="#radiomics">Radiomics</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" id="image-tab" href="#image">Image</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" id="timeline-tab" href="#timeline">Timeline</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" id="rt-tab" href="#rt">RT</a>
+                </li>
+                <li>
+                    <a data-toggle="tab" id="dosimetry-tab" href="#dosimetry">Dosimetry</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="resultTabContent">
+                <div class="tab-pane fade in active" id="demography">
+                    <div id="demography_div" style="height:800px; overflow: auto; white-space: nowrap;">
+                        <table class="table table-striped" id="demography_table"
+                               style="max-height:500px; overflow:auto">
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="medical_record">
+                    <div id="medical_record_div" style="height:800px; overflow: auto; white-space: nowrap;">
+                        <table class="table table-striped" id="medical_record_table"
+                               style="max-height:500px; overflow:auto">
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="patient_data">
+                    <div id="patientDataTree" class="treeclass" style="left : 0px">
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="radiomics">
+                    <table id="radiomicsTable" class="display nowrap" cellspacing="0"
+                           style="width: 100%; overflow: auto">
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="image">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button"
+                                        id="dropdownMenuLink_1" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="true">
+                                    Select Image
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu image-dropdown-menu" id="dropdown-menu_1"
+                                    aria-labelledby="dropdownMenuLink">
+                                </ul>
+                            </div>
+                            <div id="gui-container_1"></div>
+                            <div id="image-container_1"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button"
+                                        id="dropdownMenuLink_2" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="true">
+                                    Select Image
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu image-dropdown-menu" id="dropdown-menu_2"
+                                    aria-labelledby="dropdownMenuLink">
+                                </ul>
+                            </div>
+                            <div id="gui-container_2"></div>
+                            <div id="image-container_2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="timeline">
+                    <div id="timeline-container"></div>
+                </div>
+                <div class="tab-pane fade" id="rt">
+                    <div class="rt-container">
+                        <div class="row" style="height: 50px">
+                            <div class="col-md-3">
+                                <button class="btn btn-default dropdown-toggle" type="button"
+                                        id="dropdownMenu_study" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="true">
+                                    Select Study
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="dropdown-menu_study-list"
+                                    aria-labelledby="dropdownMenuLink">
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-default dropdown-toggle" type="button"
+                                        id="dropdownMenu_image" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="true">
+                                    Select Image
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="dropdown-menu_image-list"
+                                    aria-labelledby="dropdownMenuLink">
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-default dropdown-toggle" type="button"
+                                        id="dropdownMenu_structure" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="true">
+                                    Select Structure
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="dropdown-menu_structure-list"
+                                    aria-labelledby="dropdownMenuLink">
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-default dropdown-toggle" type="button"
+                                        id="dropdownMenu_dose" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="true">
+                                    Select Dose
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" id="dropdown-menu_dose-list"
+                                    aria-labelledby="dropdownMenuLink">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button type="button" class="rt-roi-button" onclick="displayRSAll()">Select All</button>
+                                <button type="button" class="rt-roi-button" onclick="unDisplayRSAll()">Clear All
+                                </button>
+                                <div class="roi-side-bar">
+                                    <div class="roi-loader-sign"></div>
+                                    <div id="rt-roi-list" style="overflow: auto;">
+                                    </div>
+                                </div>
+                                <div class="poi-side-bar">
+                                    <div class="roi-loader-sign"></div>
+                                    <div id="rt-poi-list" style="overflow: auto;">
+                                    </div>
+                                </div>
+                                <div class="dose-side-bar">
+                                    <div class="dose-loader-sign"></div>
+                                    <input id="dose_check_box" type="checkbox">
+                                    <label id="dose_label">Dose colorwash</label><br>
+                                </div>
+                            </div>
+                            <div class="cube rt-info-container col-md-9" id="rt-image">
+
+                                {% load static %}
+                                <div class="rt-image-loader" id="axialImageLoader"
+                                     style="position: absolute; left: 0%; top: 0%;">
+                                    <div class="image-loader-sign"></div>
+                                    <input id="dose-upper" value="">
+                                    <img id="dose-colorbar" src='{% static "resources/image/colorbar.png" %}'>
+                                    <input id="dose-lower" value="">
+                                    <div id="window-level-slider"></div>
+                                </div>
+
+                                <div class="rt-image-loader" id="dvhloader"
+                                     style="position: absolute; left: 50%; top: 0%;">
+                                    <div id="dvh_plot_div"></div>
+                                </div>
+                                <div class="rt-image-loader" id="coronalImageLoader"
+                                     style="position: absolute; left: 0px; top: 50%;">
+                                     <div class="image-loader-sign"></div>
+                                </div>
+                                <div class="rt-image-loader" id="sagittalImageLoader"
+                                     style="position: absolute; left: 50%; top: 50%;">
+                                     <div class="image-loader-sign"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="dosimetry">
+                    <div id="dosimetry_div" style="height:800px; white-space: nowrap;">
+                        <div class="row" style="height:900px; padding: 1em; overflow:auto">
+                            <div class="col-md-9">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid page" id="report-page">
+    <ul class="nav nav-tabs" id="demography_report_tab">
+        <li class="active"><a data-toggle="tab" href="#demography_report">Demography</a></li>
+    </ul>
+    <div class="tab-content" id="demography_report_content">
+        <div class="tab-pane fade in active" id="demography_report">
+
+            <div id="gender_piechart"></div>
+            <div id="age_barchart"></div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

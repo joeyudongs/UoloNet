@@ -1,0 +1,167 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <!---- bootstrap 4.0
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    --->
+    <link href="{% static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css"/>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <!---- jqueryFileTree --->
+    <link href="{% static 'filetree/jqueryFileTree.css' %}" rel="stylesheet" type="text/css" media="screen"/>
+
+
+    <!---- datatable --->
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"/>
+
+    <!--- Timeline --->
+    <link href="{% static 'vis-4.21.0/dist/vis.css' %}" rel="stylesheet" type="text/css"/>
+
+    <!--- Multiselect --->
+    <link href="{% static 'bootstrap-multiselect-master/dist/css/bootstrap-multiselect.css' %}" rel="stylesheet"
+          type="text/css"/>
+
+    <link href="{% static 'resources/css/styles.css' %}" rel="stylesheet" type="text/css"/>
+
+
+    {% block head %}
+    <title>Base</title>
+    {% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#" onclick='showPage("search-page");'>LAMBDA</a>
+        </div>
+        <ul id="navbar" class="navbar-collapse collapse">
+            {% if user.is_authenticated %}
+            <ul class="nav navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick='showPage("search-page");'>Search<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick='showPage("browse-page"); submitSearchForm();'>Browse<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick='showPage("report-page"); generateReports();'>Report<span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Preference<span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'accounts:view_profile' %}">Profile</a></li>
+                        <li><a href="{% url 'accounts:edit_profile' %}">Edit Profile</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'accounts:change_password' %}">Change Password</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+                </li>
+            </ul>
+            {% else %}
+            <ul class="navbar-nav  mr-auto">
+
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:password_reset' %}">Reset Password</a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+{% block body %}
+<!---- navigation bar --->
+
+{% endblock %}
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!---
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+--->
+<!---
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+--->
+<script type="text/javascript" src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js' %}"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<!---- file tree ---->
+<script src="{% static 'filetree/jquery.easing.js' %}"></script>
+<script src="{% static 'filetree/jqueryFileTree.js' %}"></script>
+
+<!---- data table ---->
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+<script type="text/javascript" src="https://use.edgefonts.net/source-code-pro.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+
+<!-- AMI -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js/0.0.22/ami.min.js"></script>
+
+<!-- Timeline -->
+<script type="text/javascript" src="{% static 'vis-4.21.0/dist/vis.js' %}"></script>
+
+<!-- DWV -->
+<!--<script type="text/javascript" src="{% static 'dwv/dwv.min.js' %}"></script>-->
+<script type="text/javascript" src="{% static 'dwv/dicom/dicomParser.js' %}"></script>
+<script type="text/javascript" src="{% static 'dwv/dicom/dictionary.js' %}"></script>
+<script type="text/javascript" src="{% static 'dwv/dicom/dicomElementsWrapper.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'dwv/image/geometry.js' %}"></script>
+<script type="text/javascript" src="{% static 'dwv/image/image.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'dwv/math/matrix.js' %}"></script>
+<script type="text/javascript" src="{% static 'dwv/math/point.js' %}"></script>
+<script type="text/javascript" src="{% static 'dwv/math/vector.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'dwv/gui/info.js' %}"></script>
+
+<!-- Paper -->
+<script type="text/javascript" src="{% static 'paperjs-v0.11.5/dist/paper-full.js' %}"></script>
+
+<!-- Multiselect -->
+<script type="text/javascript"
+        src="{% static 'bootstrap-multiselect-master/dist/js/bootstrap-multiselect.js' %}"></script>
+
+<!--- plotly --->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script src="{% static 'resources/js/rtdisplay.js' %}"></script>
+<script src="{% static 'resources/js/custom.js' %}"></script>
+
+</html>

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container-fluid">
+
+    <div class="navbar-default navbar-side" role="navigation"
+         style="height: 90%; overflow: scroll; overflow-x: scroll;">
+        <div class="sidebar-collapse">
+            <div id="fileTreeDemo_1" class="treeclass" style="left : 0px">
+                {% csrf_token %}
+            </div>
+        </div>
+    </div>
+    <!-- /. NAV SIDE  -->
+
+    <div id="page-wrapper">
+        <div class="header">
+            <table style="width: 100%;">
+                <tbody>
+                <tr>
+                    <td style="width: 15%; padding: 10px 40px;">Plan<br/>
+                        Plan Name：<br/>
+                        Rx Dose:
+                    </td>
+                    <td style="width: 85%; padding: 10px 40px;">Patient<br/>
+                        <table style="width: 100%;">
+                            <tbody>
+                            <tr>
+                                <td style="width: 5%;">Name:</td>
+                                <td style="width: 45%;" , id="patientName"></td>
+                                <td style="width: 5%;">ID:</td>
+                                <td style="width: 45%;" , id="patientID"></td>
+                            </tr>
+                            <tr>
+                                <td style="width: 5%;">Sex:</td>
+                                <td style="width: 45%;" , id="patientSex"></td>
+                                <td style="width: 5%;">DOB:</td>
+                                <td style="width: 45%;" , id="patientDOB"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="page-inner">
+            <div class="fixed-action-btn horizontal click-to-toggle">
+                <a class="btn-floating btn-large red">
+                    <i class="material-icons">menu</i>
+                </a>
+                <ul>
+                    <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
+                    <li><a class="btn-floating yellow darken-1"><i class="material-icons">format_quote</i></a></li>
+                    <li><a class="btn-floating green"><i class="material-icons">publish</i></a></li>
+                    <li><a class="btn-floating blue"><i class="material-icons">attach_file</i></a></li>
+                </ul>
+            </div>
+
+            <table style="width: 100%;">
+                <tbody>
+                <td style="width: 20%;">
+                    <div class="tab">
+                        <button class="tablinks1" onclick="openTab1(event, 'Structure')" id="defaultOpen1">Structure
+                        </button>
+                        <button class="tablinks1" onclick="openTab1(event, 'Isodose')">Isodose</button>
+                    </div>
+
+                    <!-- Tab content -->
+                    <div id="Structure" class="tabcontent1" style='overflow:auto; width:100%;height:400px;'>
+                    </div>
+                    <div id="Isodose" class="tabcontent1" style='overflow:auto; width:100%;height:400px;'>
+                        <h3>Isodose</h3>
+                        <p>Display Isodose.</p>
+                    </div>
+                </td>
+                <td style="width: 80%;">
+                    <div class="tab">
+                        <button class="tablinks2" onclick="openTab2(event, 'Radiomics')" id="defaultOpen2">
+                            Radiomics
+                        </button>
+                        <button class="tablinks2" onclick="openTab2(event, 'Dicom')">Dicom</button>
+                        <button class="tablinks2" onclick="openTab2(event, 'CT')">CT</button>
+                    </div>
+
+                    <!-- Tab content -->
+                    <div id="Radiomics" class="tabcontent2" style='overflow:auto; width:100%;height:400px;'>
+                        <div id="outputRadiomics"></div>
+                    </div>
+                    <div id="Dicom" class="tabcontent2" style='overflow:auto; width:60%;height:400px;'>
+                        <h3>Dicom Info</h3>
+                        <p>Display Dicom Info.</p>
+
+                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingOne">
+                                    <h4 class="panel-title">
+                                        <a role="button" data-toggle="collapse" data-parent="#accordion"
+                                           href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                            Collapsible Group Item #1
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel"
+                                     aria-labelledby="headingOne">
+                                    <div class="panel-body">
+                                        <table id="accordion-example-1" class="table" data-paging="true"
+                                               data-filtering="true" data-sorting="true"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="CT" class="tabcontent2" style='overflow:auto; width:100%;height:400px;'>
+                        <h3>CT Image</h3>
+                        <p>Display CT Image.</p>
+                    </div>
+                </td>
+                </tr>
+                </tbody>
+            </table>
+
+
+            <footer><p>Copyright &copy; 2018. Global Oncology One.inc All rights reserved.
+            </p>
+
+
+            </footer>
+        </div>
+        <!-- /. PAGE INNER  -->
+    </div>
+</div>
+{% endblock %}

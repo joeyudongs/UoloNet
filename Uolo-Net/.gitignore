@@ -1,0 +1,4 @@
+pydev
+*.pyc
+*.h5
+*.hdf5

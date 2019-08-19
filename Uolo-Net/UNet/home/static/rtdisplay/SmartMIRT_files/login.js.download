@@ -1,0 +1,704 @@
+
+var storage = window.localStorage;
+ document.onkeydown=function(event){
+    var e = event || window.event || arguments.callee.caller.arguments[0];
+    if(e && e.keyCode==27){ // 按 Esc 
+         oDialogexitsystem.removeAllContent();
+         oDialogexitsystem.addContent(new sap.m.Label({text:"要退出系统吗？"}));
+         oDialogexitsystem.open();
+    }
+    if(e && e.keyCode==113){ // 按 F2 
+         //要做的事情
+    }
+    if(loginTemp == 0){
+	    if(e && e.keyCode==13){ // enter 键
+	         //登录验证
+	         LoginVerification();
+	         loginTemp=1;
+	    }
+    }
+}; 
+$(document).ready(function(){
+  //读取 localStage 本地存储，填充用户名密码,如果自动登录有值直接跳转；
+  //相反，跳转到本页面,等待登陆处理  
+
+    var getusername = storage["username"];  
+    var getPwd = storage["password"];  
+    var getisstroepwd = storage["isstorePwd"];
+    if("yes" == getisstroepwd)  
+    {
+        oCBlogin.setSelected(true);
+        if(( ("" != getusername) ||(null != getusername)) && (("" != getPwd) ||(null != getPwd)))  
+        {  
+            //lacoste  已经保存 登陆信息            
+            oNameInputlogin.setValue(getusername);
+            oPWInputlogin.setValue(getPwd);
+        }
+    }else{
+        if(("" != getusername) || (null != getusername))
+        {  
+            //lacoste  已经保存 登陆信息
+            oNameInputlogin.setValue(getusername);
+        }
+    }
+ });  
+
+var oLayout_login = new sap.ui.layout.VerticalLayout({width:"100%"});
+
+var oLabellogin = new sap.m.Label({text:"账号："});
+//oLabellogin.addStyleClass("labelmargin");
+var oNameInputlogin = new sap.m.Input({type:sap.m.InputType.Text ,maxLength:30,width:"97%",fieldWidth: "30%",placeholder: '请输入账号'});
+//oNameInputlogin.addStyleClass("labelmargin");
+//oNameInputlogin.setValue("hijieclient1");
+oLabellogin.setLabelFor(oNameInputlogin);
+oLayout_login.addContent(oLabellogin);
+oLayout_login.addContent(oNameInputlogin);
+
+oLabelpwlogin = new sap.m.Label({text:"激活码："});
+//oLabelpwlogin.addStyleClass("labelmargin");
+//不显示密码的输入控件
+var oPWInputlogin = new sap.m.Input({type:sap.m.InputType.Password ,maxLength:30,width:"97%",fieldWidth: "30%",placeholder: '请输入激活码'});
+//oPWInputlogin.addStyleClass("labelmargin");
+//oPWInputlogin.setValue("111111");
+oLabelpwlogin.setLabelFor(oPWInputlogin);
+oLayout_login.addContent(oLabelpwlogin);
+oLayout_login.addContent(oPWInputlogin);
+
+// create a simple CheckBox
+var oCBlogin = new sap.m.CheckBox({
+    text : '记住密码',
+    tooltip : '记住密码',
+    checked : false,
+    select : function() {
+        if(oCBlogin.getSelected()){
+            //显示密码的输入控件
+            //oPWInputlogin.setType(sap.m.InputType.Text);
+        }
+        else{
+            //不显示密码的输入控件
+            //oPWInputlogin.setType(sap.m.InputType.Password);
+        };
+    }
+});
+//oCBlogin.addStyleClass("labelmargin");
+oLayout_login.addContent(oCBlogin);
+//医生登录
+var ologinButton = new sap.m.Button({text:"登录",width:"100px",type : sap.m.ButtonType.Emphasized});
+var namelogin="";
+var passlogin = "";
+ologinButton.attachPress(null,LoginVerification);
+//登录验证
+function LoginVerification(){
+	 namelogin=oNameInputlogin.getValue();
+        namelogin=namelogin.replace(/^\s+|\s+$/g, "");
+        //alert("绑定 的用户名： '"+namelogin+"'")
+        if(namelogin == ""){                                     
+            sap.m.MessageToast.show("请输入账号！");
+            return;
+        }
+        passlogin=oPWInputlogin.getValue();
+        passlogin=passlogin.replace(/^\s+|\s+$/g, "");
+        if(passlogin == ""){
+            sap.m.MessageToast.show("请输入激活码！");
+            return;
+        }
+        oNameInputlogin.getValue();
+        
+        //系统管理员登录验证
+        //systemAdminLoginVerification();
+        
+        //用户登录验证
+        UserLoginVerification();
+};
+
+ologinButton.addStyleClass("loginButtonPosition");
+oLayout_login.addContent(ologinButton);
+if(jQuery.device.is.phone){
+    //表示手机打开
+    oLabellogin.addStyleClass("componentPosition");
+    oNameInputlogin.addStyleClass("componentPosition");
+    oLabelpwlogin.addStyleClass("componentPosition");
+    oPWInputlogin.addStyleClass("componentPosition");
+    oCBlogin.addStyleClass("componentPosition");
+    oNameInputlogin.setWidth("88%");
+    oPWInputlogin.setWidth("88%");
+}
+
+var icontabBar = new sap.m.IconTabBar("icontabBarlogin",{
+        expandable: false,
+        items: [
+             new sap.m.IconTabFilter("IconTabDoctor",{
+                icon: "sap-icon://collaborate",
+                iconColor: sap.ui.core.IconColor.Positive,
+                text: "登录",
+                key: "key1",
+                content: [
+                    oLayout_login                        
+                ]
+            })
+        ]
+    });
+  icontabBar.addStyleClass("iconTabBar_background");
+
+var VBoxLogin =  new sap.m.VBox({            
+         items : [icontabBar]
+    });
+if(jQuery.device.is.phone){
+    //表示手机打开
+    VBoxLogin.setWidth("90%");
+    VBoxLogin.addStyleClass("phone-VBoxPosition")
+}else{
+    VBoxLogin.setWidth("30%");
+    VBoxLogin.addStyleClass("VBoxPosition")
+}
+
+////用系统管理员登陆：/proxy/http/192.168.9.63:10080/rest/auth/login?user=admin&passwd=manage
+////系统管理员登录验证
+//function systemAdminLoginVerification() {
+//    $.ajax({
+//        type: "get",
+//        async: false,
+//        url: "/proxy/http/192.168.9.19:8080/rest/auth/login",
+//        dataType: "json",
+//        data: {            
+//            user: namelogin,
+//            passwd: passlogin
+//        },
+//        success: function (data) {
+//            console.log(data);
+//            if(data.result == "ok"){
+//                //alert('查询的信息：success data.token:'+ data.token);
+//                current_token= data.token;                
+//                current_usertype = "0";//2医生   1医院管理 0系统管理员 3 患者
+//                current_userchs=namelogin;
+//                if(oCBlogin.getSelected()){
+//                        //存储到loaclStage  
+//                        storage["username"] = namelogin;  
+//                        storage["password"] =  passlogin;
+//                        storage["userid"] = "";
+//                        storage["usertype"] = current_usertype;
+//                        storage["userchs"] = current_userchs;
+//                        storage["isstorePwd"] =  "yes";                        
+//                        //登录成功
+//                        loginsuccess();
+//                }else{
+//                        storage["username"] = namelogin;                         
+//                        storage["password"] =  "";
+//                        storage["userid"] = "";
+//                        storage["usertype"] = current_usertype;
+//                        storage["userchs"] = current_userchs; 
+//                        storage["isstorePwd"] =  "no";                        
+//                        //登录成功
+//                        loginsuccess();
+//                }
+//            }else{
+//                //sap.m.MessageToast.show("用户名和密码证不正确定！");
+//                //current_token="";
+//                //医生登录验证
+//                doctorLoginVerification();
+//            }
+//        },
+//        timeout: 5000,
+//        error: function () {
+//        	sap.m.MessageToast.show("访问验证接口失败！");
+//            current_token="";
+//        }
+//    });
+// };
+//
+////医生登录验证
+//function doctorLoginVerification() {
+//    $.ajax({
+//        type: "get",
+//        async: false,
+//        url: "/proxy/http/192.168.9.19:8080/rest/auth/rclogin",
+//        dataType: "json",
+//        data: {
+//            type:"doctor",
+//            user: namelogin,
+//            passwd: passlogin
+//        },
+//        success: function (data) {
+//            console.log(data);
+//            if(data.result == "ok"){
+//                //alert('查询的信息：success data.token:'+ data.token);
+//                current_token= data.token; 						
+//                GetdoctorData();
+//            }else{
+//                //sap.m.MessageToast.show("用户名和密码证不正确定！");
+//                //current_token="";
+//            	//患者登录验证
+//                patientLoginVerification();
+//            }
+//        },
+//        timeout: 5000,
+//        error: function () {
+//            sap.m.MessageToast.show("访问验证接口失败！");
+//            current_token="";
+//        }
+//    });
+// };
+//
+////获取指定医生数据
+//function GetdoctorData(){
+//    //获取医生数据
+//    PublicDataAccessModel.read("/Doctor?token="+current_token+"&$filter=LoginID eq '"+namelogin+"'",{success: getdoctorsuccess, error: getdoctorerror});
+//}
+//function getdoctorsuccess(bResult) {
+//    //alert("成功查询的获取医生数据");
+//    //console.log(bResult.results);			
+//    current_userid = bResult.results[0].RecId;
+//    current_usertype = "2";//2医生   1医院管理 0系统管理员 3 患者
+//    if(bResult.results[0].IsAdmin){
+//        current_usertype = "1";//医院管理员
+//    }else{
+//    	current_hospitalID = bResult.results[0].HospitalID;
+//    	//获取当前登录医生所管理的患者总数据
+//        getPatientCount();
+//    }
+//    current_userchs = bResult.results[0].DoctorName;
+//    if(oCBlogin.getSelected()){
+//            //存储到loaclStage  
+//            storage["username"] = namelogin;  
+//            storage["password"] =  passlogin;
+//            storage["userid"] = current_userid;
+//            storage["usertype"] = current_usertype;
+//            storage["userchs"] = current_userchs;
+//            storage["isstorePwd"] =  "yes";
+//            //window.location.href ='/startcategory.html?id='+userid+'&type='+usertype+'&token='+current_token;
+//            //登录成功
+//            loginsuccess();
+//    }else{
+//            storage["username"] = namelogin;                         
+//            storage["password"] =  "";
+//            storage["userid"] = current_userid;
+//            storage["usertype"] = current_usertype;
+//            storage["userchs"] = current_userchs; 
+//            storage["isstorePwd"] =  "no";
+//            //window.location.href ='/startcategory.html?id='+userid+'&type='+usertype+'&token='+current_token;
+//            //登录成功
+//            loginsuccess();
+//    }
+//}
+//function getdoctorerror(bResult) {
+//    console.log('---Get Data error-----');
+//    //alert("错误返回的结果: " + bResult);
+//}
+//
+////患者登录验证
+//function patientLoginVerification() {
+//    $.ajax({
+//        type: "get",
+//        async: false,
+//        url: "/proxy/http/192.168.9.19:8080/rest/auth/rclogin",
+//        dataType: "json",
+//        data: {
+//            type:"patient",
+//            user: namelogin,
+//            passwd: passlogin
+//        },
+//        success: function (data) {
+//            console.log(data);
+//            if(data.result == "ok"){                
+//                current_token= data.token; 						
+//                GetpatientData();
+//            }else{
+//                sap.m.MessageToast.show("用户名和密码证不正确定！");
+//                current_token="";
+//            }
+//        },
+//        timeout: 5000,
+//        error: function () {
+//            sap.m.MessageToast.show("访问验证接口失败！");
+//            current_token="";
+//        }
+//    });
+// };
+// 
+// 
+// //登录验证
+//function LoginVerification() {
+//    $.ajax({
+//        type: "get",
+//        async: false,
+//        url: "/proxy/http/192.168.9.19:8080/rest/auth/rclogin",
+//        dataType: "json",
+//        data: {
+//            type:"RTUser",
+//            user: namelogin,
+//            passwd: passlogin
+//        },
+//        success: function (data) {
+//            console.log(data);
+//            if(data.result == "ok"){                
+//                current_token= data.token;
+//                GetpatientData();
+//            }else{
+//                sap.m.MessageToast.show("用户名和密码证不正确定！");
+//                current_token="";
+//            }
+//        },
+//        timeout: 5000,
+//        error: function () {
+//            sap.m.MessageToast.show("访问验证接口失败！");
+//            current_token="";
+//        }
+//    });
+// };
+//
+////获取指定患者数据
+//function GetpatientData(){
+//    //获取医生数据
+//    PublicDataAccessModel.read("/Patient?token="+current_token+"&$filter=LoginID eq '"+namelogin+"'",{success: getpatientsuccess, error: getpatienterror});
+//}
+//function getpatientsuccess(bResult) {
+//    //alert("成功查询的获取患者数据");
+//    //console.log(bResult.results);			
+//    current_userid = bResult.results[0].RecId;
+//    current_usertype = "3";//2医生   1医院管理 0系统管理员 3 患者   
+//    current_userchs = bResult.results[0].PatientName;
+//    if(oCBlogin.getSelected()){
+//            //存储到loaclStage  
+//            storage["username"] = namelogin;  
+//            storage["password"] =  passlogin;
+//            storage["userid"] = current_userid;
+//            storage["usertype"] = current_usertype;
+//            storage["userchs"] = current_userchs;
+//            storage["isstorePwd"] =  "yes";
+//            //window.location.href ='/startcategory.html?id='+userid+'&type='+usertype+'&token='+current_token;
+//            //登录成功
+//            loginsuccess();
+//    }else{
+//            storage["username"] = namelogin;                         
+//            storage["password"] =  "";
+//            storage["userid"] = current_userid;
+//            storage["usertype"] = current_usertype;
+//            storage["userchs"] = current_userchs; 
+//            storage["isstorePwd"] =  "no";
+//            //window.location.href ='/startcategory.html?id='+userid+'&type='+usertype+'&token='+current_token;
+//            //登录成功
+//            loginsuccess();
+//    }
+//}
+//function getpatienterror(bResult) {
+//    console.log('---Get Data error-----');
+//    //alert("错误返回的结果: " + bResult);
+//}
+
+//登录验证 url: "/proxy/http/192.168.9.19:8080/rest/auth/rclogin",
+
+function UserLoginVerification() {
+    $.ajax({
+        type: "get",
+        async: false,
+        url: loginurl,
+        dataType: "json",
+        data: {
+            user:namelogin,
+            passwd:passlogin
+        },
+        success: function (data) {
+        	//数据格式：{"result":"ok","roleid":"625B4492258E4F6E93C2790C245D154D","rolename":"Doctor","token":"cd940f0e10934812bdc1fa69d320724e"}
+            //console.log(data);
+        	//清除原有角色信息
+        	for(var n=0;n<current_userRole.length;n++){
+				current_userRole.remove(n);//删除下标为 i 的元素
+				//current_usertype.remove(n);
+				n--;
+			}; 
+            if(data.result == "ok"){
+                current_token = data.token;
+                token = current_token;
+                var roles = data.roles;
+                var rolesstr = JSON.stringify(roles);//实例："{"96DEAC98CE134698BD9ACDE73D2FF168":"HospitalAdmin","625B4492258E4F6E93C2790C245D154D":"Doctor"}"
+                rolesstr = rolesstr.replace("{","");
+                rolesstr = rolesstr.replace("}","");
+                var rolesarr = rolesstr.split(",");
+                for(var i=0; i < rolesarr.length;i++){
+                	var role = rolesarr[i];
+                	var rolearr = role.split(":");
+                	var id = rolearr[0];
+                	id = id.substring(1, (id.length - 1));
+                	var name = rolearr[1];
+                	name = name.substring(1, (name.length - 1));
+                	current_userRole.push({
+							RoleName: name,
+							RoleId: id
+				     });
+//				    if(name == "SysAdmin"){
+//	                	//0系统管理员    1医院管理员  2医生 3 患者
+//	                	current_usertype.push({
+//							type: "0"
+//				     	});
+//	                }else if(name == "HospitalAdmin"){
+//	                	current_usertype.push({
+//							type: "1"
+//				     	});
+//	                }else if(name == "Doctor"){
+//	                	current_usertype.push({
+//							type: "2"
+//				     	});
+//	                }else if(name == "Patient"){
+//	                	current_usertype.push({
+//							type: "3"
+//				     	});
+//	                };
+                };
+                
+                //获取全部角色数据
+			    getAllRoleData();
+			    //获取所有用户与角色关系数据
+				getAllUserRoleData();
+				//获取医院总数
+				getHospitalCount();
+				
+                //获取当前登录用户数据
+                GetRTUserData();
+            }else{
+                sap.m.MessageToast.show("用户名和密码证不正确定！");
+                current_token="";
+            }
+        },
+        timeout: 5000,
+        error: function (data) {
+            sap.m.MessageToast.show("访问验证接口失败！"+data);
+            current_token="";
+        }
+    });
+ };
+ 
+ //获取当前登录用户数据
+function GetRTUserData(){
+    //获取当前登录用户数据
+    PublicDataAccessModel.read("/RTUser?token="+current_token+"&$filter=LoginID eq '"+namelogin+"'",{success: getRTUsersuccess, error: getRTUsererror});
+}
+function getRTUsersuccess(bResult) {
+    //alert("成功查询的获取患者数据");
+    //console.log(bResult.results);
+    current_userid = bResult.results[0].RecId;
+	
+	for(var n=0;n<current_userRole.length;n++){
+		if(current_userRole[n].RoleName == "SysAdmin"){
+			current_userchs = namelogin;
+			break;
+		}else{
+			current_userchs = bResult.results[0].Name;
+			current_hospitalID = bResult.results[0].HospitalID;
+			break;
+		};
+	};	
+    
+    if(oCBlogin.getSelected()){
+            //存储到loaclStage  
+            storage["username"] = namelogin;
+            storage["password"] =  passlogin;
+            storage["userid"] = current_userid;
+            storage["userchs"] = current_userchs;
+            storage["isstorePwd"] =  "yes";
+            //window.location.href ='/startcategory.html?id='+userid+'&type='+usertype+'&token='+current_token;
+            //登录成功
+            loginsuccess();
+    }else{
+            storage["username"] = namelogin;
+            storage["password"] =  "";
+            storage["userid"] = current_userid;
+            storage["userchs"] = current_userchs;
+            storage["isstorePwd"] =  "no";
+            //window.location.href ='/startcategory.html?id='+userid+'&type='+usertype+'&token='+current_token;
+            //登录成功
+            loginsuccess();
+    }
+}
+function getRTUsererror(bResult) {
+    console.log('---Get Data error-----');
+    //alert("错误返回的结果: " + bResult);
+}
+
+//登录成功
+function loginsuccess(){
+	loginTemp=1;
+	
+//	//获取全部角色数据
+//    getAllRoleData();
+//    //获取所有用户与角色关系数据
+//	getAllUserRoleData();
+	
+	HospitalStandardTile.setInfo("共有 "+current_hospitalCount+" 家医院");
+	
+	for(var n=0;n<current_userRole.length;n++){
+		if(current_userRole[n].RoleName == "SysAdmin"){
+			//获取医生全部数据
+			getDoctorCount();
+			//获取患者总数据
+	        getPatientCount();
+	        break;
+		};
+	}; 
+	
+	tileContainer.removeAllTiles();
+	opage1List.removeAllItems();
+	for(var n=0;n<current_userRole.length;n++){
+		if(current_userRole[n].RoleName == "SysAdmin"){
+			tileContainer.addTile(HospitalStandardTile);
+			tileContainer.addTile(DoctorStandardTile);
+			tileContainer.addTile(PatientStandardTile);
+			//tileContainer.addTile(SystemSetStandardTile);
+			
+			for (var i = 0; i < homeData.length; i++) {
+			    var listItem = new sap.m.StandardListItem({
+			        title: homeData[i].title,
+			        icon: homeData[i].icon,
+			        type: "Navigation"
+			    });
+			    opage1List.addItem(listItem);
+			};
+			break;
+		}else{
+			if(current_userRole.length > 1){
+				if(((current_userRole[n].RoleName == "Doctor") && (current_userRole[n+1].RoleName == "HospitalAdmin")) ||
+				   ((current_userRole[n].RoleName == "HospitalAdmin") && (current_userRole[n+1].RoleName == "Doctor")) ){
+						tileContainer.addTile(DoctorStandardTile);
+					    tileContainer.addTile(PatientStandardTile);
+						tileContainer.addTile(DoctorAccountStandardTile);
+					    var listItem = new sap.m.StandardListItem({
+					        title: homeData[1].title,
+					        icon: homeData[1].icon,
+					        type: "Navigation"
+					    });
+					    opage1List.addItem(listItem);
+					    var listItem = new sap.m.StandardListItem({
+					        title: homeData[2].title,
+					        icon: homeData[2].icon,
+					        type: "Navigation"
+					    });
+					    opage1List.addItem(listItem);
+					    var listItem2 = new sap.m.StandardListItem({
+					        title: homeData[4].title,
+					        icon: homeData[4].icon,
+					        type: "Navigation"
+					    });
+					    opage1List.addItem(listItem2);
+					    
+					    //获取患者总数据
+					    getPatientCount();
+					    
+					    //获取医生数据
+			            //doctormangesplitApp(current_userRole,current_hospitalID);
+						//获取医生总数据
+						getDoctorCount();
+					    break;
+				};
+			}else{
+				if(current_userRole[n].RoleName == "Doctor"){
+					tileContainer.addTile(PatientStandardTile);
+					tileContainer.addTile(DoctorAccountStandardTile);
+				    var listItem = new sap.m.StandardListItem({
+				        title: homeData[2].title,
+				        icon: homeData[2].icon,
+				        type: "Navigation"
+				    });
+				    opage1List.addItem(listItem);
+				    var listItem2 = new sap.m.StandardListItem({
+				        title: homeData[4].title,
+				        icon: homeData[4].icon,
+				        type: "Navigation"
+				    });
+				    opage1List.addItem(listItem2);
+				    //获取患者总数据
+					getPatientCount();
+				    
+					
+			//		PatientShell.destroyApp();
+			//		//获取当前账户所属医院
+			//		getDoctorHospitalID();
+			
+			//		pagePatientManagement.removeAllContent();		
+			//		PatientShell.setApp(oPatientApp);
+			//		pagePatientManagement.addContent(PatientShell);//oPatientApp
+			//		pagePatientManagement.setTitle(homeData[2].title);
+				    break;
+				    
+				}else if(current_userRole[n].RoleName == "HospitalAdmin"){
+			//		tileContainer.addTile(DoctorStandardTile);
+			//	    var listItem = new sap.m.StandardListItem({
+			//	        title: homeData[1].title,
+			//	        icon: homeData[1].icon,
+			//	        type: "Navigation"
+			//	    });
+			//	    opage1List.addItem(listItem);
+					
+					//获取医院管理员所在医院ID及医生数据
+					//getHospitalFromUserID();
+					
+					//获取医生数据
+		            doctormangesplitApp(current_userRole,current_hospitalID);
+					//获取医生总数据
+					getDoctorCount();
+					
+					pageDoctorManagement.removeAllContent();
+					pageDoctorManagement.addContent(DoctorShell);//oSplitApp
+					pageDoctorManagement.setTitle(homeData[1].title);
+					break;
+					
+				}else if(current_userRole[n].RoleName == "Patient"){
+					pagePatientinfo.removeAllContent();
+					var apptemp = PatientShell.getApp();
+					PatientShell.setApp(oPatientSplitApp);
+					pagePatientinfo.addContent(PatientShell);//oPatientSplitApp
+					
+					break;
+				};
+			};
+		};
+	};
+	
+	page1.removeAllHeaderContent();
+    page1_header =  new sap.ui.core.HTML({
+		content: '<p id="pWelcome" style="float: left; line-height: 20px; margin-left: 10px">欢迎您，Admin</p>',
+		width: "100%",
+		afterRendering : function(e){
+			var pWelcome = document.getElementById("pWelcome");
+			pWelcome.textContent = "欢迎您，" + current_userchs;
+		}
+	});
+    page1.addHeaderContent(page1_header);
+    page1.addHeaderContent(page1_headergrid);
+    page1.addHeaderContent(page1_headerlist);
+    page1.addHeaderContent(page1_headerexit);
+	
+    for(var n=0;n<current_userRole.length;n++){
+		if(current_userRole[n].RoleName == "SysAdmin"){
+			app.to(page1);
+			break;
+		}else{
+			if(current_userRole.length > 1){
+					if(((current_userRole[n].RoleName == "Doctor") && (current_userRole[n+1].RoleName == "HospitalAdmin")) ||
+					   ((current_userRole[n].RoleName == "HospitalAdmin") && (current_userRole[n+1].RoleName == "Doctor"))){
+					   		app.to(page1);
+					   		break;
+				   };
+			}else{
+				if(current_userRole[n].RoleName == "Doctor"){
+					app.to(page1);
+					//app.to(homeData[2].pageto);
+					
+					//获取患者数据(需要放到，成功获取到 current_hospitalID 的方法中)
+					//PatientmangesplitApp(current_usertype,current_hospitalID,current_userid);
+					break;
+				}else if(current_userRole[n].RoleName == "HospitalAdmin"){
+				    app.to(homeData[1].pageto);
+					//获取医生数据(需要放到，成功获取到 current_hospitalID 的方法中)
+					//doctormangesplitApp(current_usertype,current_hospitalID);
+				    break;
+				}else if(current_userRole[n].RoleName == "Patient"){
+					//显示患者详细信息页
+					//根据患者ID获取患者相关数据,填充患者显示列表
+			        GetpatientDataFromPatientID(current_userid);
+			        break;
+				};
+			};
+		};
+    };
+};
+
+

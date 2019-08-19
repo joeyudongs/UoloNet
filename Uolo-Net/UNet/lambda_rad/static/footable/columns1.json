@@ -1,0 +1,14 @@
+[
+  {"name":"id","title":"ID"},
+  {"name":"Calculating_features_for_structure","title":"Calculating features for structure"},
+  {"name":"general_info_BoundingBox","title":"general_info_BoundingBox"},
+  {"name":"general_info_EnabledImageTypes","title":"general_info_EnabledImageTypes"},
+  {"name":"general_info_GeneralSettings","title":"general_info_GeneralSettings"},
+  {"name":"general_info_ImageHash","title":"general_info_ImageHash"},
+  {"name":"general_info_ImageSpacing","title":"general_info_ImageSpacing"},
+  {"name":"general_info_MaskHash","title":"general_info_MaskHash"},
+  {"name":"general_info_Version","title":"general_info_Version"},
+  {"name":"general_info_VolumeNum","title":"general_info_VolumeNum"},
+  {"name":"general_info_VoxelNum","title":"general_info_VoxelNum"}
+
+]

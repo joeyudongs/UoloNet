@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Load the Paper.js library -->
+<script type="text/javascript" src="../dist/paper-full.js"></script>
+<!-- Load external PaperScript and associate it with myCanvas -->
+<script type="text/javascript">
+	paper.install(window);
+	// Keep global references to both tools, so the HTML
+	// links below can access them.
+	var tool1, tool2;
+
+	window.onload = function() {
+		paper.setup('myCanvas');
+
+		// Create two drawing tools.
+		// tool1 will draw straight lines,
+		// tool2 will draw clouds.
+
+		var path = new Path();
+        path.strokeColor = 'black';
+        path.add(new Point(30, 75)); 
+        path.add(new Point(30, 25)); 
+        path.add(new Point(80, 25));
+        path.add(new Point(80, 75));
+        path.closed = true;
+
+        // Select the path, so we can see its handles:
+        path.fullySelected = true;
+
+        // Create a copy of the path and move it 100pt to the right:
+        var copy = path.clone();
+        copy.fullySelected = true;
+        copy.position.x += 100;
+
+        // Smooth the segments of the copy:
+        copy.smooth();
+	}
+</script>
+</head>
+<body>
+    <a href="#" onclick="tool1.activate();">Lines</a>
+    <a href="#" onclick="tool2.activate();">Clouds</a>
+	<canvas id="myCanvas" resize></canvas>
+</body>
+</html>

@@ -1,0 +1,4 @@
+Patient_ID,HPV/p16_status,Gender,Age_at_diagnosis,Race,Tumor_side,Tumor_subsite,T_category,N_category,AJCC_Stage,Pathological_grade,Smoking_status_at_diagnosis,Smoking_Pack-Years
+1,1,Male,58,White,L,Tonsil,2,0,II,III,Former,5
+2,0,Female,78,White,R,BOT,3,0,III,II,Former,70
+3,1,Male,57,White,R,Tonsil,1,2b,IV,III,Current,30

@@ -1,0 +1,648 @@
+var currentSelectpatientRecId;
+var patientAdd = true;
+
+var PatientShell= new sap.m.Shell({
+            title: "Patient Manage Application",
+            //logo: "images/SAPUI5.png",
+            showLogout: false
+    });
+    
+//刷新==========================
+function getpatientLastUpdated() {
+    return  new Date().toLocaleTimeString();
+}
+var RefreshpatientData = false;
+var Refreshpatient = new sap.m.PullToRefresh({
+        description: getpatientLastUpdated(),
+        refresh: function(){
+            setTimeout(function(){
+					RefreshpatientData = true;
+					Refreshpatient.hide();
+					for(var n=0;n<current_userRole.length;n++){
+						if(current_userRole[n].RoleName == "SysAdmin"){
+							//获取所有患者主数据,填充患者显示列表
+						    GetpatientAllData();
+							break;
+						}else{
+							 //获取当前医生所有患者主数据,填充患者显示列表
+						     GetpatientAllDataFromID(DoctorID);
+							break;
+						};
+					};
+					Refreshpatient.setDescription(getpatientLastUpdated());
+            }, 2000);
+        }
+});
+//==========================
+
+//搜索栏==========================
+function onSearchPatient(event) {
+//                jQuery.sap.log.debug("searchField: search for: " + event.getParameter("query"));
+//                if(event.getParameter("refreshButtonPressed")){
+//                    jQuery.sap.log.debug("searchField: refresh button was pressed");
+//                }                
+    //sap.m.MessageToast.show("搜索栏：onSearch……");              
+
+    // switch visibility of lists
+    var bShowSearch = osearchPatient.getValue().length !== 0;
+
+    // filter Patient list
+    var oBinding = oPatientList.getBinding("items");
+    //var oBinding2 = oPatientList.getAggregation("items",oItemTemplateStandardIcon);
+    if (oBinding) {
+        if (bShowSearch) {
+            var oFilter = new sap.ui.model.Filter("title", sap.ui.model.FilterOperator.Contains, osearchPatient.getValue());
+            oBinding.filter([oFilter]);
+        } else {
+            oBinding.filter([]);
+        };
+    };
+};
+function onLiveChange(event) {
+    //jQuery.sap.log.debug("searchField: liveChange for: " + event.getParameter("newValue"));
+    //sap.m.MessageToast.show("搜索栏：onLiveChange……");
+};
+var osearchPatient = new sap.m.SearchField({
+		//placeholder: "搜索患者...", 
+        search:onSearchPatient,  //单击查找时执行
+        liveChange:onLiveChange //当查找栏中内容发生变化时时执行
+});
+///////////////////////////////
+
+
+var oAddPatientButton = new sap.m.Button({text:"",icon:"sap-icon://add"});//添加新的患者
+oAddPatientButton.attachPress(function(){
+    patientAdd = true;
+//    //清除患者信息
+//    clearEditPatientSimpleForm()
+//	//清除患者患者病历记录信息
+//    PublicJsonModel.setProperty("/MedicalRecordModelTable",[]);
+//    MedicalRecordTable.setGrowing(true);
+//	MedicalRecordTable.setModel(PublicJsonModel);
+//    MedicalRecordTable.bindItems("/MedicalRecordModelTable", MedicalRecordTemplate);
+//    //清除患者Dicom信息
+//    PublicJsonModel.setProperty("/DicomModelTable",[]);
+//    DicomTable.setGrowing(true);
+//	DicomTable.setModel(PublicJsonModel);	
+//	DicomTable.bindItems("/DicomModelTable", DicomTemplate);
+//    //清除患者治疗计划信息
+//    PublicJsonModel.setProperty("/planModelData",[]);
+//    planTable.setGrowing(true);
+//	planTable.setModel(PublicJsonModel);
+//	planTable.bindItems("/planModelData", planTemplate);
+//	
+//	//清除患者列表中数据
+//	initialisePatientList("");
+    
+    //清除患者信息
+    clearPatientinfo();
+	
+	//oPatientSplitApp.to(oPatientDetailPage);
+    oPatientApp.to(oPatientChildPage);
+    //设置基本信息中各栏是否为可编辑状态
+    setPatientBasicInfoFromState(true);
+//    oSavePatientBasicInfoButton.setVisible(true);
+//    oEidtPatientBasicInfoButton.setVisible(false);
+    oPatientSplitApp.toMaster(oPatientBasicInfoMasterPageEdit);
+	
+	//向Dicom 增加测试数据
+//	var InfoData = {};
+//			InfoData.PatientID = "76545B4D09F34BBEA45D140B5E2CFA5B";
+//            InfoData.BrowseAddress = "/home/data/chenxiufang/20150323";
+//	PublicDataAccessModel.create("/Dicom?token="+token, InfoData, {success: function(){}, error: function(){}});	
+});
+
+var oDeletePatientButton = new sap.m.Button({
+	text:"删除",
+	icon:"sap-icon://delete",
+	tooltip : "Delete Patient(s)",
+	press: function() {
+		patientTableMaster.setMode(sap.m.ListMode.MultiSelect);
+		var patientItems = patientTableMaster.getItems();
+		for (var i = 0; i < patientItems.length; i++) {
+			patientTableMaster.setSelectedItem(patientItems[i], false);
+		};
+		
+		masterPageFooterBar.removeContentRight(oSharePatientButton);
+		masterPageFooterBar.removeContentRight(oDeletePatientButton);
+		masterPageFooterBar.addContentRight(oDeleteConfirmButton);
+		masterPageFooterBar.addContentRight(oDeleteCancelButton);
+		
+		
+	}
+});//删除患者
+
+var oDeleteConfirmButton = new sap.m.Button({
+	text:"确定",
+	icon:"sap-icon://accept",
+	tooltip : "Delete Confirm",
+	press: function() {
+		var oSelectedItems = patientTableMaster.getSelectedItems();
+		var deletepatientRecIdarr=[];
+		for (var i = 0; i < oSelectedItems.length; i++) {
+			var current_spath = oSelectedItems[i].getBindingContext().getPath();//得到："/navigationtable/1"  1 为当前选择项目的数据序号
+			var currentall = current_spath.split('/');
+			var xh = parseInt(currentall[2]);
+			var patientRecId = oSelectedItems[i].getBindingContext().oModel.oData.navigationtable[xh].RecId;
+			deletepatientRecIdarr.push(patientRecId);			
+		};
+		
+		if(deletepatientRecIdarr.length > 0){
+			for (var n = 0; n < deletepatientRecIdarr.length; n++) {
+				var patientBasicInfoData = {};
+				patientBasicInfoData.IsDeleted = "1";
+				var patientRecId = deletepatientRecIdarr[n];
+				PublicDataAccessModel.update("/RTUser('"+patientRecId+"')?token="+token, patientBasicInfoData, {success: DeletePatientSuccess(patientRecId), error: DeletePatientError});
+				//患者总数据
+				current_patientCount--;
+			};
+			
+			patientTableMaster.setMode(sap.m.ListMode.SingleSelectMaster);
+			masterPageFooterBar.removeContentRight(oDeleteConfirmButton);
+			masterPageFooterBar.removeContentRight(oDeleteCancelButton);
+			
+			masterPageFooterBar.addContentRight(oSharePatientButton);
+			masterPageFooterBar.addContentRight(oDeletePatientButton);
+			
+			//向患者表格中填充数据
+			iniPatientTableMasterData();
+		}else{
+			patientTableMaster.setMode(sap.m.ListMode.SingleSelectMaster);
+			masterPageFooterBar.removeContentRight(oDeleteConfirmButton);
+			masterPageFooterBar.removeContentRight(oDeleteCancelButton);
+			
+			masterPageFooterBar.addContentRight(oSharePatientButton);
+			masterPageFooterBar.addContentRight(oDeletePatientButton);
+		};
+	}
+});//删除患者
+
+var oDeleteCancelButton = new sap.m.Button({
+	text:"取消",
+	icon:"sap-icon://decline",
+	tooltip : "Delete Cancel",
+	press: function() {
+		patientTableMaster.setMode(sap.m.ListMode.SingleSelectMaster);
+		masterPageFooterBar.removeContentRight(oDeleteConfirmButton);
+		masterPageFooterBar.removeContentRight(oDeleteCancelButton);
+		
+		masterPageFooterBar.addContentRight(oSharePatientButton);
+		masterPageFooterBar.addContentRight(oDeletePatientButton);		
+	}
+});//删除患者
+
+//清除患者信息
+function clearPatientinfo(){
+	 //清除患者信息
+    clearEditPatientSimpleForm()
+	//清除患者患者病历记录信息
+    PublicJsonModel.setProperty("/MedicalRecordModelTable",[]);
+    MedicalRecordTable.setGrowing(true);
+	MedicalRecordTable.setModel(PublicJsonModel);
+    MedicalRecordTable.bindItems("/MedicalRecordModelTable", MedicalRecordTemplate);
+    //清除患者Dicom信息
+    PublicJsonModel.setProperty("/DicomModelTable",[]);
+    DicomTable.setGrowing(true);
+	DicomTable.setModel(PublicJsonModel);	
+	DicomTable.bindItems("/DicomModelTable", DicomTemplate);
+    //清除患者治疗计划信息
+    PublicJsonModel.setProperty("/planModelData",[]);
+    planTable.setGrowing(true);
+	planTable.setModel(PublicJsonModel);
+	planTable.bindItems("/planModelData", planTemplate);
+	
+	for(var n=0;n<current_userRole.length;n++){
+		if(current_userRole[n].RoleName == "Patient"){
+			break;
+		}else{
+			//清除患者列表中数据
+			initialisePatientList("");
+			break;
+		};
+	};
+};
+
+
+var oSharePatientButton = new sap.m.Button({
+	text:"分享",
+	icon:"sap-icon://share-2",
+	tooltip : "share Patient",
+	press: function() {
+		patientTableMaster.setMode(sap.m.ListMode.MultiSelect);
+		var patientItems = patientTableMaster.getItems();
+		for (var i = 0; i < patientItems.length; i++) {
+			patientTableMaster.setSelectedItem(patientItems[i], false);
+		};
+		
+		//清除以前选择的患者列表数据
+		for(var i=0;i<current_sharepatientRecIdarr.length;i++){
+			current_sharepatientRecIdarr.remove(i);//删除下标为 i 的元素
+			i--;
+		};
+		
+		//获取当前所有医院数据
+		GetCurrentAllHospital_Patient();		
+		//获取当前所有医生患者关系表数据
+		GetCurrentAllUserRelation_Patient();
+		//用ajax 获取所有医生数据
+		GetCurrentAllDoctorAjax_Patient();
+		
+		masterPageFooterBar.removeContentRight(oDeletePatientButton);
+		masterPageFooterBar.removeContentRight(oSharePatientButton);
+		
+		masterPageFooterBar.addContentRight(oShareConfirmButton);
+		masterPageFooterBar.addContentRight(oShareCancelButton);
+	}
+});//分享患者
+
+var oShareConfirmButton = new sap.m.Button({
+	text:"确定",
+	icon:"sap-icon://accept",
+	tooltip : "Delete Confirm",
+	press: function() {
+		var oSelectedItems = patientTableMaster.getSelectedItems();
+		
+		for (var i = 0; i < oSelectedItems.length; i++) {
+			var current_spath = oSelectedItems[i].getBindingContext().getPath();//得到："/navigationtable/1"  1 为当前选择项目的数据序号
+			var currentall = current_spath.split('/');
+			var xh = parseInt(currentall[2]);
+			var patientRecId = oSelectedItems[i].getBindingContext().oModel.oData.navigationtable[xh].RecId;
+			current_sharepatientRecIdarr.push(patientRecId);
+		};
+		
+		if(current_sharepatientRecIdarr.length > 0){
+//			for (var n = 0; n < sharepatientRecIdarr.length; n++) {
+//				var patientBasicInfoData = {};
+//				patientBasicInfoData.IsDeleted = "1";
+//				var patientRecId = deletepatientRecIdarr[n];
+//				PublicDataAccessModel.update("/RTUser('"+patientRecId+"')?token="+token, patientBasicInfoData, {success: DeletePatientSuccess(patientRecId), error: DeletePatientError});
+//				//患者总数据
+//				current_patientCount--;
+//			};
+			
+			//打开选择医生列表的窗口
+			oPatientTableSelectDialog.open("");			
+			// initiate model  current_AllDoctor_Patient.navigationTableSelectDialog
+			PublicJsonModel.setProperty("/navigationTableSelectDialog",current_AllDoctor_Patient.navigationTableSelectDialog);		
+			oPatientTableSelectDialog.setModel(PublicJsonModel);			
+			oPatientTableSelectDialog.bindAggregation("items", "/navigationTableSelectDialog", oPatientTableSelectItemTemplate);			
+			
+			patientTableMaster.setMode(sap.m.ListMode.SingleSelectMaster);
+			
+			masterPageFooterBar.removeContentRight(oShareConfirmButton);
+			masterPageFooterBar.removeContentRight(oShareCancelButton);
+			
+			masterPageFooterBar.addContentRight(oSharePatientButton);
+			masterPageFooterBar.addContentRight(oDeletePatientButton);
+		}else{
+//			patientTableMaster.setMode(sap.m.ListMode.SingleSelectMaster);
+//			
+//			masterPageFooterBar.removeContentRight(oShareConfirmButton);
+//			masterPageFooterBar.removeContentRight(oShareCancelButton);
+//			
+//			masterPageFooterBar.addContentRight(oSharePatientButton);
+//			masterPageFooterBar.addContentRight(oDeletePatientButton);
+			sap.m.MessageToast.show("请勾选要分享患者！");
+		}
+	}
+});//确定分享患者
+
+var oShareCancelButton = new sap.m.Button({
+	text:"取消",
+	icon:"sap-icon://decline",
+	tooltip : "Delete Cancel",
+	press: function() {
+		patientTableMaster.setMode(sap.m.ListMode.SingleSelectMaster);
+		masterPageFooterBar.removeContentRight(oShareConfirmButton);
+		masterPageFooterBar.removeContentRight(oShareCancelButton);
+		
+		masterPageFooterBar.addContentRight(oSharePatientButton);
+		masterPageFooterBar.addContentRight(oDeletePatientButton);
+	}
+});//取消分享患者
+
+
+var MasterPageTop = new sap.m.Bar({
+		contentLeft:[
+			Refreshpatient
+		],
+		contentRight: [
+			osearchPatient
+		]
+ });
+
+var oEidtPatientBasicInfoButton = new sap.m.Button({text:"编辑",icon:"sap-icon://edit"});//编辑
+	oEidtPatientBasicInfoButton.attachPress(function(){
+//        oSavePatientBasicInfoButton.setVisible(true);
+//        oEidtPatientBasicInfoButton.setVisible(false);
+        //设置基本信息中各栏是否为可编辑状态
+        setPatientBasicInfoFromState(true);
+        //患者账户不能编辑
+        patientAccount.setEnabled(false);
+        
+        patientAdd = false;
+        oPatientSplitApp.toMaster(oPatientBasicInfoMasterPageEdit);
+	});
+	
+var oSavePatientBasicInfoButton = new sap.m.Button({text:"保存",icon:"sap-icon://save"});//保存
+	oSavePatientBasicInfoButton.attachPress(function(){
+		SavePatientBasicInfo();
+		//oPatientSplitApp.toMaster(oPatientBasicInfoMasterPageBrowse);
+	});
+//    oSavePatientBasicInfoButton.setVisible(false);
+    
+var oCanclePatientBasicInfoButton = new sap.m.Button({text:"取消",icon:"sap-icon://sys-cancel"});//返回
+	oCanclePatientBasicInfoButton.attachPress(function(){
+		oPatientSplitApp.toMaster(oPatientBasicInfoMasterPageBrowse);
+		//oEidtPatientBasicInfoButton.setVisible(true);
+	});    
+         
+//左边患者基本信息浏览页
+var oPatientBasicInfoMasterPageBrowse = new sap.m.Page({
+	title: oBundle.getText("患者基本信息"),
+	showNavButton: true, 
+	navButtonPress: function(){
+		//cT图页打开没有返回时,强制返回
+		oPatientSplitApp.backDetail();
+		oPatientSplitApp.toMaster(oPatientBasicInfoMasterPageBrowse);
+		for(var n=0;n<current_userRole.length;n++){
+			if(current_userRole[n].RoleName == "Patient"){
+				//app.back();
+				oDialogexitsystem.removeAllContent();
+	            oDialogexitsystem.addContent(new sap.m.Label({text:"要退出系统吗？"}));
+	            oDialogexitsystem.open();
+				break;
+			}else{
+				oPatientApp.back();
+				break;
+			};
+	   };
+	},
+	content: [
+	    oPatientList,
+//	    oLayoutPatientBasicinfo,
+	    patientAboutForm
+	],
+	footer: new sap.m.Toolbar({
+		content: [
+		    new sap.m.ToolbarSpacer(),
+            oEidtPatientBasicInfoButton            
+		]
+	})
+});
+
+//左边患者基本信息编辑页
+var oPatientBasicInfoMasterPageEdit = new sap.m.Page({
+	title: oBundle.getText("患者基本信息"),
+	showNavButton: true, 
+	navButtonPress: function(){
+		//cT图页打开没有返回时,强制返回
+		oPatientSplitApp.backDetail();
+		oPatientSplitApp.toMaster(oPatientBasicInfoMasterPageBrowse);
+		for(var n=0;n<current_userRole.length;n++){
+			if(current_userRole[n].RoleName == "Patient"){
+				//app.back();
+				oDialogexitsystem.removeAllContent();
+	            oDialogexitsystem.addContent(new sap.m.Label({text:"要退出系统吗？"}));
+	            oDialogexitsystem.open();
+				break;
+			}else{
+				oPatientApp.back();
+				break;
+			};
+	   };
+	},
+	content: [	    
+        editPatientSimpleForm
+	],
+	footer: new sap.m.Toolbar({
+		content: [
+		    new sap.m.ToolbarSpacer(),
+            //oEidtPatientBasicInfoButton,
+            oSavePatientBasicInfoButton,
+            oCanclePatientBasicInfoButton
+		]
+	})
+});
+
+//Dicom
+var oCTiconTabFilter = new sap.m.IconTabFilter({
+            icon: "sap-icon://inspection",
+            iconColor: sap.ui.core.IconColor.Neutral,
+            key: "key3",
+            text: "CT图",
+			content:[DicomTable]
+    });
+
+
+var icontabBarPatient = new sap.m.IconTabBar({
+    expandable: false,
+        select: function(){
+    	if(this.getSelectedKey()=="key2"){
+    		MedicalRecordAdd.setVisible(true);
+    	}else if(this.getSelectedKey()=="key3"){
+    		MedicalRecordAdd.setVisible(false);
+    	}else if(this.getSelectedKey()=="key4"){
+    		MedicalRecordAdd.setVisible(false);
+    	}
+	},
+    items: [
+//         new sap.m.IconTabFilter({
+//            icon: "sap-icon://collaborate",
+//            iconColor: sap.ui.core.IconColor.Positive,
+//            text: "基本信息",
+//            key: "key1",
+//            content: [
+//                editPatientSimpleForm
+//            ]
+//        }),
+        new sap.m.IconTabFilter({
+            icon: "sap-icon://work-history",
+            iconColor: sap.ui.core.IconColor.Neutral,
+            key: "key2",
+            text: "患者病历记录",
+            content: [
+				 MedicalRecordTop,
+                 MedicalRecordTable
+            ]
+        }),
+        oCTiconTabFilter,
+        new sap.m.IconTabFilter({
+            icon: "sap-icon://request",
+            iconColor: sap.ui.core.IconColor.Neutral,
+            key: "key4",
+            text: "治疗计划",
+            content: [
+               planTable
+            ]
+        })
+    ]
+});
+icontabBarPatient.addStyleClass("vlayout");
+
+var oSaveButtonPatient = new sap.m.Button({text:"保存",icon:"sap-icon://save"});//保存
+oSaveButtonPatient.attachPress(function(){
+    SavePatientBasicInfo();
+});
+
+//右边患者内容页
+var oPatientDetailPage = new sap.m.Page({
+    title: "患者信息",
+	showNavButton: jQuery.device.is.phone,
+	navButtonText: "Back",
+	navButtonPress: function() {
+		//oPatientSplitApp.back();
+		oPatientSplitApp.toMaster(oPatientBasicInfoMasterPageBrowse);		
+	},
+    content: [
+        icontabBarPatient
+    ],
+    footer: new sap.m.Toolbar({
+		content: [
+		    new sap.m.ToolbarSpacer(),
+            MedicalRecordAdd
+        ]
+    })
+});
+oPatientDetailPage.addStyleClass("patientMasterPage");
+
+//var oPatientSplitApp = new sap.m.App();
+//oPatientSplitApp.addPage(oPatientMasterPage);
+//oPatientSplitApp.addPage(oPatientDetailPage);
+//oPatientSplitApp.addPage(oPatientDetailCTPage);
+//oPatientSplitApp.addPage(PlanDetailsPage);
+//oPatientSplitApp.addPage(PlanCommentPage);
+//oPatientSplitApp.addPage(MedicalRecordAddPage);
+//oPatientSplitApp.addPage(DicomInfoPage);
+//oPatientSplitApp.setInitialPage(oPatientMasterPage);
+
+//create SplitApp()
+var oPatientSplitApp = new sap.m.SplitApp({
+	detailPages: [oPatientDetailPage,PlanDetailsPage,PlanCommentPage,MedicalRecordAddPage,DicomInfoPage,oPatientDetailCTPage],
+	masterPages: [oPatientBasicInfoMasterPageBrowse,oPatientBasicInfoMasterPageEdit],
+	initialDetail: oPatientDetailPage,
+	initialMaster: oPatientBasicInfoMasterPageBrowse
+});
+
+
+if (sap.ui.Device.system.tablet  || sap.ui.Device.system.desktop) {
+	oPatientSplitApp.setDefaultTransitionNameDetail("fade");
+}
+
+var masterPageFooterBar = new sap.m.Bar({
+	contentRight: [
+		//oAddPatientButton,
+		oSharePatientButton,
+		oDeletePatientButton
+	]
+});
+
+//患者列表页
+var oPatientMasterPage = new sap.m.Page({
+	title: oBundle.getText("PAT_oPatientMasterPage_title"), //患者列表
+	showNavButton: true, 
+	navButtonPress: function(){
+		//2医生	
+//		if(current_usertype == "2"){
+//			oDialogexitsystem.removeAllContent();
+//            oDialogexitsystem.addContent(new sap.m.Label({text:"要退出系统吗？"}));
+//            oDialogexitsystem.open();
+//		}else{
+			app.back();
+			//重新初始化患者列表页显示状态
+			iniPatientTableMasterstate();
+			PatientStandardTile.setInfo("共有  "+current_patientCount+" 位患者");
+//		};
+	},
+	content: [
+		//MasterPageTop,
+		patientTableMasterTop,
+        patientTableMaster
+	],
+	footer: masterPageFooterBar
+});
+oPatientMasterPage.addStyleClass("patientMasterPage");
+
+//患者详细信息页
+var oPatientChildPage = new sap.m.Page({
+	title: "在患者列表中单击一个患者后进入详细信息页",
+	showHeader : false,
+	showNavButton: false, 
+	navButtonPress: function(){
+		oPatientApp.back();
+	},
+	content: [		
+        oPatientSplitApp
+	]
+});
+
+var oPatientApp = new sap.m.App();
+oPatientApp.addPage(oPatientMasterPage);
+oPatientApp.addPage(oPatientChildPage);
+oPatientApp.setInitialPage(oPatientMasterPage);
+
+//获取患者数据
+function PatientmangesplitApp(userRole,hospitalid,DoctorID) {
+    //获取数据操作权限Token
+	//GetTokendata();
+//	for(var n=0;n<userRole.length;n++){
+//		if(userRole[n].RoleName == "SysAdmin"){
+			//获取医院数据,填充医院选择框
+		    GetHospital_Patient();
+//			break;
+//		}else{
+//			//根据指定医院ID获取指定医院数据,填充医院选择框
+//		    GetHospitalFromHospitalID_Patient(hospitalid);
+//			break;
+//		};
+//	};
+	
+	//放到 获取医院数据完成后方法 getHospitalsuccess_Patient 中。
+//	//usertype: 2医生 1医院管理 0系统管理员 3 患者
+//	if(usertype == "0"){
+//		//获取所有患者主数据,填充患者显示列表
+//		GetpatientAllData();
+//	} else{			
+//		//获取当前医生所有患者主数据,填充患者显示列表
+//		GetpatientAllDataFromID(DoctorID);
+//	}
+};
+
+//删除患者成功
+function DeletePatientSuccess(patientRecId) {
+	PublicDataAccessModel.refresh();
+	PublicDataAccessModel.refreshMetadata();
+
+	for (var i = 0; i < patientAllDatalist.length; i++) {
+		if (patientAllDatalist[i].RecId == patientRecId) {
+			patientAllDatalist.splice(i, 1);
+			i--;
+			break;
+		};
+	};
+
+	for (var i = 0; i < patientTableData.navigationtable.length; i++) {
+		if (patientTableData.navigationtable[i].RecId == patientRecId) {
+			patientTableData.navigationtable.splice(i, 1);
+			i--;
+			break;
+		};
+	};	
+	sap.m.MessageToast.show("删除患者成功！");
+}
+
+//删除患者失败
+function DeletePatientError(bResult) {
+	//console.log('---Add Doctor error -----');
+	sap.m.MessageToast.show("删除患者失败！"+bResult.message);
+};
+
+
+
+
+
+
+
+
+
+
