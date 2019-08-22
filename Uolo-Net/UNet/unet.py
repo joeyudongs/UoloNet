@@ -22,7 +22,7 @@ from keras.utils import multi_gpu_model
 
 from keras.preprocessing import image
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"   #有多少个显卡，挑第几个，编号为1的显卡
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"   #number 1 gpu
 
 #
 # train_data_path = os.path.join(data_path, 'images')
@@ -62,7 +62,7 @@ def data_gen_file(data_dir, mask_dir, images, batch_size, dims):
         imgs = np.array(imgs)
         labels = np.array(labels)
         yield imgs.reshape(-1,dims[0],dims[1],1), labels.reshape(-1, dims[0], dims[1], 1)  #The yield statement suspends function’s execution and sends a value back to caller, but retains enough state to enable function to resume where it is left off.
-        
+                                                                                            #only 1 column, unknown row, automatically calculate
 #
 #
 # train_gen = data_gen_file(train_data_path, mask_data_path,train_images, 2, [512, 512])
@@ -74,7 +74,8 @@ def data_gen_file(data_dir, mask_dir, images, batch_size, dims):
 
 
 #test_data = data_insert.get_test_data(institution_name="Test")
-
+#test_gen = test_gen_file(test_data_path, test_images, batch_size, dims)
+#dims = [256, 256]
 # generator that we will use to read the data from the directory
 def test_gen_file(data_dir, images, batch_size, dims):
 
@@ -502,7 +503,7 @@ def main():
 # test
 
     #results = model.predict_generator(test_gen, steps=step_per_epoch)
-    results = model.predict_generator(test_gen, steps=len(test_images)) #????前面是训练，你准备问题，它给你答案#Generates predictions for the input samples from a data generator.
+    results = model.predict_generator(test_gen, steps=len(test_images)) #前面是训练，你准备问题，它给你答案#Generates predictions for the input samples from a data generator.
     saveResult("data/test_result", results)
 
 

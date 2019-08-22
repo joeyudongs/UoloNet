@@ -6,7 +6,7 @@ import glob
 import skimage.io as io
 import skimage.transform as trans
 
-Sky = [128,128,128]                 
+Sky = [128,128,128]                       #10 ge id, 10 ge class
 Building = [128,0,0]
 Pole = [192,192,128]
 Road = [128,64,128]
@@ -109,12 +109,12 @@ def geneTrainNpy(image_path,mask_path,flag_multi_class = False,num_class = 2,ima
     return image_arr,mask_arr
 
 
-def labelVisualize(num_class,color_dict,img):    
-    img = img[:,:,0] if len(img.shape) == 3 else img          #升降维....看source code理解的,改一下子会怎么样。。。看code，不理解就变一变，跑一跑。
-    img_out = np.zeros(img.shape + (3,))
+def labelVisualize(num_class,color_dict,img):                   #id transform to color
+    img = img[:,:,0] if len(img.shape) == 3 else img          #san tong dao bianwei yi tong dao, 升降维....看source code理解的,改一下子会怎么样。。。看code，不理解就变一变，跑一跑。
+    img_out = np.zeros(img.shape + (3,))  #bianhuan cheng santongdao
     for i in range(num_class):
-        img_out[img == i,:] = color_dict[i]
-    return img_out / 255
+        img_out[img == i,:] = color_dict[i]                     #bianli meige pixel
+    return img_out / 255                                        #normalization
 
 
 
